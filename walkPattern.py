@@ -5,6 +5,14 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from mpl_toolkits.mplot3d import Axes3D
 
+with open("programMemory.txt", "r+") as f:
+        lines = f.readlines()
+        if len(lines) > 0:
+            last_line = lines[len(lines) - 1].strip()
+            f.write(f"{int(last_line) + 1}\n")
+with open("log.txt", "a") as f:
+    f.write(f"===={last_line}====\n")
+
 def tween3D(start, end, intervals, precision=6):
     endList = []
     intervalDistance = ((end[0] - start[0]) / intervals, (end[1] - start[1]) / intervals, (end[2] - start[2]) / intervals)

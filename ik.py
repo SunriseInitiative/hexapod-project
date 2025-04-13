@@ -3,13 +3,28 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from mpl_toolkits.mplot3d import Axes3D
 
+def forwardKinematics2Link3D(theta_base, theta_shoulder, theta_elbow, L1, L2):
+    theta_base_rad = math.radians(theta_base)
+    theta_shoulder_rad = math.radians(theta_shoulder)
+    theta_elbow_rad = math.radians(theta_elbow)
+
+    base_x, base_y, base_z = 0, 0, 0
+    shoulder_x = L1 * math.cos(theta_shoulder_rad) * math.sin(theta_base_rad)
+    shoulder_y = L1 * math.sin(theta_shoulder_rad)
+    shoulder_z = L1 * math.cos(theta_shoulder_rad) * math.cos(theta_base_rad)
+    elbow_x = shoulder_x + L2 * math.cos(theta_elbow_rad) * math.sin(theta_base_rad)
+    elbow_y = shoulder_y + L2 * math.sin(theta_elbow_rad)
+    elbow_z = shoulder_z + L2 * math.cos(theta_elbow_rad) * math.cos(theta_base_rad)
+
+    return (base_x, base_y, base_z, shoulder_x, shoulder_y, shoulder_z,
+            elbow_x, elbow_y, elbow_z)
+
 def inverseKinematics2Link3D(x, y, z, L1, L2):
     theta_base = math.atan2(x, z)
     dxz = math.sqrt(x**2 + z**2)
     d = math.sqrt(dxz**2 + y**2)
     max_reach = L1 + L2
-    if d > max_reach:
-        d = max_reach
+    
     cos_elbow = (L1**2 + L2**2 - d**2) / (2 * L1 * L2)
     cos_elbow = max(-1.0, min(1.0, cos_elbow))
     theta_elbow = math.acos(cos_elbow)
@@ -18,6 +33,18 @@ def inverseKinematics2Link3D(x, y, z, L1, L2):
     theta_shoulder_offset = math.acos(cos_shoulder)
     theta_shoulder_elevation = math.atan2(y, dxz)
     theta_shoulder = theta_shoulder_elevation + theta_shoulder_offset
+    if d > max_reach:
+        d = max_reach
+        print("Target is out of reach. Clamping to max reach.")
+        print("Target position:", (x, y, z))
+        print("Articulated position:", forwardKinematics2Link3D(math.degrees(theta_base), math.degrees(theta_shoulder), math.degrees(theta_elbow), L1, L2))
+    elif forwardKinematics2Link3D(math.degrees(theta_base), math.degrees(theta_shoulder), math.degrees(theta_elbow), L1, L2) != (x, y, z):
+        print("Impossible to articulate to the target position.")
+        print("Target position:", (x, y, z))
+        print("Articulated position:", forwardKinematics2Link3D(math.degrees(theta_base), math.degrees(theta_shoulder), math.degrees(theta_elbow), L1, L2))
+    with open("log.txt", "a") as f:
+        f.write(f"Target position: {x, y, z}\n")
+        f.write(f"Articulated position: {forwardKinematics2Link3D(math.degrees(theta_base), math.degrees(theta_shoulder), math.degrees(theta_elbow), L1, L2)}\n")
     return {
         "theta_base": math.degrees(theta_base),
         "theta_shoulder": math.degrees(theta_shoulder),
