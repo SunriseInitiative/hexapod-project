@@ -61,9 +61,15 @@ constraints = {
     'elbow': (0, 150)
 }
 
-angles = IK(x=10, y=10, z=3, L1=20, L2=10, constraints=constraints)
+def SafeIK(x, y, z, L1, L2, constraints):
 
-if angles:
-    print("Joint Angles:", angles)
-else:
-    print("Target position is unreachable or violates constraints.")
+    angles = IK(x=x, y=y, z=z, L1=L1, L2=L2, constraints=constraints)
+
+    if angles:
+        print("Joint Angles:", angles)
+        return angles
+    else:
+        print("Target position is unreachable or violates constraints.")
+        return False
+
+
