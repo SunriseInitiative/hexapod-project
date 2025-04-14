@@ -5,11 +5,13 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from mpl_toolkits.mplot3d import Axes3D
 
+last_line = 0
+
 with open("programMemory.txt", "r+") as f:
         lines = f.readlines()
         if len(lines) > 0:
             last_line = lines[len(lines) - 1].strip()
-            f.write(f"{int(last_line) + 1}\n")
+            f.write(f"{int(last_line) + 1}\n\n")
 with open("log.txt", "a") as f:
     f.write(f"===={last_line}====\n")
 
